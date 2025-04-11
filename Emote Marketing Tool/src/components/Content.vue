@@ -228,7 +228,7 @@ const drawPreviewImage = async (canvas: HTMLCanvasElement) => {
       <div v-for="backgroundColor in backgroundColors">
         <div
           style="display: inline-block; height: 20px; width: 20px"
-          :style="`background: {{background}}`"
+          :style="{ background: backgroundColor }"
         ></div>
         <p style="display: inline">{{ backgroundColor }}</p>
       </div>
