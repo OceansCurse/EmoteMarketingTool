@@ -1,31 +1,16 @@
 <script setup lang="ts">
     import { ref } from "vue";
     import ColorList from "./ColorList.vue";
-
-    interface Preview {
-        bg: string;
-        size: number;
-        dataUrl: string;
-    }
+    import SizeList from "./SizeList.vue";
+    import ImagePreviewList from "./ImagePreviewList.vue";
 
     const backgroundColors = ref<String[]>(["#FFFFFFFF", "#000000FF", "#2299FFFF"]);
+    const sizes = ref<number[]>([224, 112, 56, 28]);
 
     const fileInput = ref<HTMLInputElement | null>(null);
-    const originalSize = ref<number>(0);
-    const sizes = [112, 56, 28] as const;
-    const previews = ref<Preview[]>([]);
     const originalImage = ref<HTMLImageElement | null>(null);
-    const canvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const promoCanvasRef = ref<HTMLCanvasElement | null>(null);
     const originalImageCanvas = ref<HTMLCanvasElement | null>(null);
-
-    const setCanvasRef = (size: number, el: Element | null) => {
-        if (el instanceof HTMLCanvasElement) {
-            canvasRefs.value.set(`scaled-${size}`, el);
-        } else {
-            console.error("Element is not a canvas:", el);
-        }
-    };
 
     const handleFileUpload = (event: Event) => {
         const target = event.target as HTMLInputElement;
@@ -39,9 +24,9 @@
             img.src = e.target?.result as string;
             img.onload = () => {
                 originalImage.value = img;
-                setOriginalImage();
-                generatePreviews();
-                drawPreviewImage(promoCanvasRef.value as HTMLCanvasElement);
+                // setOriginalImage();
+                // generatePreviews();
+                // drawPreviewImage(promoCanvasRef.value as HTMLCanvasElement);
             };
         };
         reader.readAsDataURL(file);
@@ -60,79 +45,6 @@
         }
 
         context?.drawImage(originalImage.value, 0, 0);
-    };
-
-    const generatePreviews = () => {
-        previews.value = [];
-        sizes.forEach((size) => {
-            const canvas = canvasRefs.value.get(`scaled-${size}`);
-            if (!canvas) return;
-
-            const context = canvas.getContext("2d");
-            if (!context || !originalImage.value) return;
-
-            // Enable image smoothing (cross-browser)
-            context.imageSmoothingEnabled = true;
-
-            // Clear and set background
-            context.clearRect(0, 0, size, size);
-            context.fillStyle = "red";
-            context.fillRect(0, 0, size, size);
-
-            // Multi-step scaling for better quality
-            // Step 1: Scale to 224x224 (intermediate for all sizes)
-            const step1Canvas = document.createElement("canvas");
-            step1Canvas.width = 224;
-            step1Canvas.height = 224;
-            const step1Context = step1Canvas.getContext("2d");
-            if (!step1Context) return;
-            step1Context.imageSmoothingEnabled = true;
-            step1Context.drawImage(originalImage.value, 0, 0, 224, 224);
-
-            if (size === 112) {
-                // Step 2: Scale from 224x224 to 112x112
-                context.drawImage(step1Canvas, 0, 0, 112, 112);
-            } else if (size === 56) {
-                // Step 2: Scale from 224x224 to 112x112
-                const step2Canvas = document.createElement("canvas");
-                step2Canvas.width = 112;
-                step2Canvas.height = 112;
-                const step2Context = step2Canvas.getContext("2d");
-                if (!step2Context) return;
-                step2Context.imageSmoothingEnabled = true;
-                step2Context.drawImage(step1Canvas, 0, 0, 112, 112);
-
-                // Step 3: Scale from 112x112 to 56x56
-                context.drawImage(step2Canvas, 0, 0, 56, 56);
-            } else if (size === 28) {
-                // Step 2: Scale from 224x224 to 112x112
-                const step2Canvas = document.createElement("canvas");
-                step2Canvas.width = 112;
-                step2Canvas.height = 112;
-                const step2Context = step2Canvas.getContext("2d");
-                if (!step2Context) return;
-                step2Context.imageSmoothingEnabled = true;
-                step2Context.drawImage(step1Canvas, 0, 0, 112, 112);
-
-                // Step 3: Scale from 112x112 to 56x56
-                const step3Canvas = document.createElement("canvas");
-                step3Canvas.width = 56;
-                step3Canvas.height = 56;
-                const step3Context = step3Canvas.getContext("2d");
-                if (!step3Context) return;
-                step3Context.imageSmoothingEnabled = true;
-                step3Context.drawImage(step2Canvas, 0, 0, 56, 56);
-
-                // Step 4: Scale from 56x56 to 28x28
-                context.drawImage(step3Canvas, 0, 0, 28, 28);
-            }
-
-            previews.value.push({
-                bg,
-                size,
-                dataUrl: canvas.toDataURL("image/png"),
-            });
-        });
     };
 
     const downloadPreview = async () => {
@@ -214,45 +126,45 @@
             :onColorRemoved="(color: String) => {
                 const index = backgroundColors.indexOf(color);
                 if (index > -1) {
-                    backgroundColors.splice(index, 1);
+                    backgroundColors.splice(index, 1).reverse();
                 }
             }"
         />
 
-        <canvas
-            :ref="(el: HTMLCanvasElement) => (originalImageCanvas = el)"
-            :width="originalSize"
-            :height="originalSize"
-        ></canvas>
-        <p>Original</p>
+        <SizeList
+            title="Backgrounds"
+            :sizes="sizes"
+            :onSizeAdded="(size: number) => {
+                sizes.push(size)
+                sizes = sizes.sort((a, b) => a - b).reverse();
+            }"
+            :onSizeRemoved="(size: number) => {
+                const index = sizes.indexOf(size);
+                if (index > -1) {
+                    sizes.splice(index, 1);
+                    sizes = sizes.sort((a, b) => a - b).reverse();
+                }
+            }"
+        />
 
-        <div>
-            <div
-                v-for="size in sizes"
-                :key="size"
-                class="inline-block w-24 h-24 m-2"
-            >
-                <canvas
-                    :ref="(el) => setCanvasRef(size, el as HTMLCanvasElement)"
-                    :width="size"
-                    :height="size"
-                    class="border-2 border-gray-300 rounded"
-                ></canvas>
-                <p>{{ size }}x{{ size }}</p>
-            </div>
-            <div class="preview-row">
-                <canvas
-                    :ref="(el: HTMLCanvasElement) => (promoCanvasRef = el)"
-                    :width="500"
-                    :height="400"
-                ></canvas>
-            </div>
-            <button
-                @click="downloadPreview"
-                :disabled="!previews.length"
-            >
-                Download Preview
-            </button>
+        <ImagePreviewList
+            :sizes="sizes"
+            :originalImage="originalImage"
+        />
+
+        <div class="preview-row">
+            <canvas
+                :ref="(el: HTMLCanvasElement) => (promoCanvasRef = el)"
+                :width="500"
+                :height="400"
+            ></canvas>
         </div>
+        <!--         
+        <button
+            @click="downloadPreview"
+            :disabled="!previews.length"
+        >
+            Download Preview
+        </button> -->
     </div>
 </template>
