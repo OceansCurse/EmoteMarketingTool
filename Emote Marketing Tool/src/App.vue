@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import Content from './components/Content.vue'
+    import Content from "./components/Content.vue";
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-  </header>
+    <header class="m-12">
+        <h1 class="text text-4xl">Emote Marketing Tool</h1>
+    </header>
 
-  <main>
-    <Content />
-  </main>
+    <main>
+        <Content />
+    </main>
 </template>
 
 <style lang="css" scoped>
-header, main {
-  display: block;
-}
+    header,
+    main {
+        display: block;
+    }
 </style>
