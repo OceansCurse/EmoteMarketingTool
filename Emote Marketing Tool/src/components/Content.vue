@@ -4,13 +4,14 @@
     import SizeList from "./SizeList.vue";
     import ImagePreviewList from "./ImagePreviewList.vue";
 
+    const selectedPreset = ref<String>("Twitch");
+    const presets = ref<String[]>(["Twitch", "Discord", "YouTube"]);
     const backgroundColors = ref<String[]>(["#FFFFFFFF", "#000000FF", "#2299FFFF"]);
     const sizes = ref<number[]>([224, 112, 56, 28]);
 
     const fileInput = ref<HTMLInputElement | null>(null);
     const originalImage = ref<HTMLImageElement | null>(null);
     const promoCanvasRef = ref<HTMLCanvasElement | null>(null);
-    const originalImageCanvas = ref<HTMLCanvasElement | null>(null);
 
     const handleFileUpload = (event: Event) => {
         const target = event.target as HTMLInputElement;
@@ -32,19 +33,22 @@
         reader.readAsDataURL(file);
     };
 
-    const setOriginalImage = () => {
-        if (originalImageCanvas.value == null) {
-            console.error("originalImageCanvas ref is null");
-            return;
+    const onPresetChanged = (preset: String) => {
+        console.log("Preset changed to:", preset);
+        switch (preset) {
+            case "Twitch":
+                backgroundColors.value = ["#FFFFFFFF", "#000000FF", "#2299FFFF"];
+                sizes.value = [224, 112, 56, 28];
+                break;
+            case "Discord":
+                backgroundColors.value = ["#FFFFFFFF", "#000000FF", "#FF0000FF"];
+                sizes.value = [128, 64, 32];
+                break;
+            case "YouTube":
+                backgroundColors.value = ["#FF0000FF", "#FFFFFFFF", "#000000FF"];
+                sizes.value = [128, 64, 32];
+                break;
         }
-        const context = originalImageCanvas.value.getContext("2d");
-
-        if (originalImage.value == null) {
-            console.error("Original Image has no value");
-            return;
-        }
-
-        context?.drawImage(originalImage.value, 0, 0);
     };
 
     const downloadPreview = async () => {
@@ -112,6 +116,7 @@
 
 <template>
     <div class="emote-uploader m-12">
+        <h2 class="text text-2xl">Upload Emote</h2>
         <input
             type="file"
             accept="image/*"
@@ -119,7 +124,26 @@
             ref="fileInput"
         />
 
+        <!-- Presets dropdown -->
+        <section class="mt-4">
+            <h2 class="text text-2xl">Presets</h2>
+            <select
+                v-model="selectedPreset"
+                :v-on:change="onPresetChanged(selectedPreset)"
+                class="mt-2"
+            >
+                <option
+                    v-for="preset in presets"
+                    :key="preset"
+                    :value="preset"
+                >
+                    {{ preset }}
+                </option>
+            </select>
+        </section>
+
         <ColorList
+            class="mt-4"
             title="Backgrounds"
             :colors="backgroundColors"
             :onColorAdded="(color: String) => backgroundColors.push(color)"
