@@ -29,15 +29,16 @@ const handleFileUpload = (event: Event) => {
 </script>
 
 <template>
-  <div class="w-full h-200 bg-neutral-600 rounded-2xl relative">
+  <div class="w-full h-200 bg-neutral-700 rounded-2xl relative">
     <div class="absolute w-full h-full">
       <div class="h-full grid grid-flow-col justify-items-center">
-        <div class="p-12 bg-neutral-700 self-center rounded-4xl inset-shadow-sm inset-shadow-neutral-900/50">
+        <div class="p-12 bg-neutral-800/50 justify-items-center self-center rounded-4xl inset-shadow-sm inset-shadow-neutral-900">
           <div
-            class="text-neutral-100 justify-items-center border-neutral-900/50 border-4 border-spacing-20 border-dashed rounded-4xl p-20"
+            class="text-neutral-300 text-center border-neutral-900 border-4 border-spacing-20 border-dashed rounded-4xl p-20"
           >
+            <i class="pi pi-file-arrow-up text-8xl mb-4"></i>
             <h2 class="text text-4xl">Click to choose a file</h2>
-            <p class="text text-xl">or</p>
+            <p class="text text-xl my-4">or</p>
             <h2 class="text text-4xl">Drag a file in here</h2>
           </div>
         </div>
