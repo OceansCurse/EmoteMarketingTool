@@ -4,6 +4,8 @@
     import Settings from "./components/Settings.vue";
 
     const sizes = ref<number[]>([224, 112, 56, 28]);
+    const backgroundColors = ref<String[]>(["#FFFFFFFF", "#000000FF", "#2299FFFF"]);
+
     const getScrollbarWidth = () => {
         const outer = document.createElement("div");
         outer.style.overflow = "scroll";
@@ -23,16 +25,21 @@
         <!-- Flex container for main and aside -->
         <div class="flex flex-col md:flex-row flex-grow p-4 bg-neutral-200 overflow-auto">
             <!-- Main Content -->
-            <main class="flex-1 h-auto mr-4">
-                <Content :sizes="sizes" />
+            <main class="flex-1 h-auto w-full bg-neutral-100 rounded-2xl shadow-l mr-4">
+                <Content
+                    :sizes="sizes"
+                    :backgroundColors="backgroundColors" />
             </main>
             <!-- Sidebar -->
             <aside
                 class="h-max bg-neutral-100 p-8 rounded-2xl shadow-l"
-                :class="'right-[' + getScrollbarWidth() + 'px]'"
-            >
+                :class="'right-[' + getScrollbarWidth() + 'px]'">
                 <div class="">
-                    <Settings :sizes="sizes" />
+                    <Settings
+                        :sizes="sizes"
+                        :backgroundColors="backgroundColors"
+                        :onSizesUpdated="(newSizes: number[]) => sizes = newSizes"
+                        :onBackgroundColorsUpdated="(newBackgroundColors: string[]) => backgroundColors = newBackgroundColors" />
                 </div>
             </aside>
         </div>

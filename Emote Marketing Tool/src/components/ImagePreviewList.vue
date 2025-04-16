@@ -6,6 +6,10 @@
             required: true,
             type: Array as () => number[],
         },
+        backgroundColors: {
+            required: true,
+            type: Array as () => string[],
+        },
         originalImage: {
             type: HTMLImageElement || null,
             default: null,
@@ -27,6 +31,9 @@
         }
     };
 
+    // Needs to be optimized, Could just generate sizes ones when the image is uploaded
+    // Taking the original size and just halving it until something like 12px, then every time
+    // sizes change, it could just pick the closest bigger size.
     const generatePreviews = (original: HTMLCanvasElement | null) => {
         if (original instanceof HTMLCanvasElement) {
             originalCanvasRef.value = original;
@@ -96,48 +103,126 @@
             });
         });
     };
+
+    const drawPreviewImage = async (canvas: HTMLCanvasElement) => {
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        const slotSize = 112;
+        const totalWidth = 500;
+        const rowHeight = 200;
+        const emotesWidth = 112 * 3;
+        const horizontalPadding = (totalWidth - emotesWidth) / 2;
+
+        canvas.width = totalWidth;
+        canvas.height = rowHeight * 2;
+
+        // Draw full background rectangles
+        context.fillStyle = "black";
+        context.fillRect(0, 0, totalWidth, rowHeight);
+        context.fillStyle = "white";
+        context.fillRect(0, rowHeight, totalWidth, rowHeight);
+
+        // Load and draw images
+        const loadPromises: Promise<void>[] = [];
+        props.backgroundColors.forEach((bg, rowIndex) => {
+            const rowOffset = rowIndex * rowHeight + rowHeight / 2 - slotSize / 2;
+
+            props.sizes.forEach((size, colIndex) => {
+                const preview = previews.value.find((p) => p.size === size);
+                if (!preview) return;
+
+                const img = new Image();
+                img.src = preview.dataUrl;
+
+                const promise = new Promise<void>((resolve) => {
+                    img.onload = () => {
+                        const colOffset = colIndex * slotSize;
+                        const xOffset = colOffset + horizontalPadding + (slotSize / 2 - size / 2);
+                        const yOffset = rowOffset + (slotSize / 2 - size / 2);
+
+                        context.fillStyle = "red";
+                        context.lineWidth = 2;
+                        context.strokeStyle = "#FF0000";
+                        context.strokeRect(colOffset + horizontalPadding, rowOffset, slotSize, slotSize);
+                        context.drawImage(img, xOffset, yOffset, size, size);
+                        resolve();
+                    };
+                });
+                loadPromises.push(promise);
+            });
+        });
+
+        return await Promise.all(loadPromises);
+    };
+
+    const downloadPreview = async () => {
+        const canvas = document.createElement("canvas");
+        await drawPreviewImage(canvas);
+
+        const link = document.createElement("a");
+        link.download = "emote-preview.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    };
+
     watch(
         () => props.sizes,
-        (newSizes) => {
-            console.log("not adding sizes?");
-            generatePreviews();
-        },
+        (newSizes) => generatePreviews(null),
         { immediate: true, deep: true }
     );
 </script>
 
 <template>
-    <div>
-        <p
-            v-if="!props.originalImage"
-            class="text text-l"
-        >
-            No image uploaded
-        </p>
-        <div class="inline-block m-2">
-            <canvas
-                :ref="(el) => generatePreviews(el as HTMLCanvasElement)"
-                :width="originalImage?.naturalWidth ?? 0"
-                :height="originalImage?.naturalWidth ?? 0"
-            ></canvas>
+    <div class="w-full flex flex-flow-col">
+        <!-- Sizes -->
+        <div class="w-full m-8">
+            <h2 class="text text-4xl">Sizes</h2>
             <p
-                v-if="originalImage"
-                class="text text-center w-full"
-            >
-                {{ originalImage?.naturalWidth ?? 0 }}x{{ originalImage?.naturalWidth ?? 0 }} (Original)
+                v-if="!props.originalImage"
+                class="text text-l">
+                No image uploaded
             </p>
+            <div class="inline-block m-2">
+                <canvas
+                    :ref="(el) => generatePreviews(el as HTMLCanvasElement)"
+                    :width="originalImage?.naturalWidth ?? 0"
+                    :height="originalImage?.naturalWidth ?? 0"></canvas>
+                <p
+                    v-if="originalImage"
+                    class="text text-center w-full">
+                    {{ originalImage?.naturalWidth ?? 0 }}x{{ originalImage?.naturalWidth ?? 0 }}
+                    (Original)
+                </p>
+            </div>
+            <div
+                v-for="size in props.sizes"
+                :key="size"
+                class="inline-block m-2">
+                <canvas
+                    :ref="(el) => setCanvasRef(size, el as HTMLCanvasElement)"
+                    :width="size"
+                    :height="size"></canvas>
+                <p class="text text-center w-full">{{ size }}x{{ size }}</p>
+            </div>
         </div>
-        <div
-            v-for="size in props.sizes"
-            :key="size"
-            class="inline-block m-2"
-        >
-            <canvas
-                :ref="(el) => setCanvasRef(size, el as HTMLCanvasElement)"
-                :width="size"
-                :height="size"
-            ></canvas>
-            <p class="text text-center w-full">{{ size }}x{{ size }}</p>
+        <!-- Previews -->
+        <div class="w-full m-8">
+            <h2 class="text text-4xl">Previews</h2>
+            <div class="preview-row">
+                <canvas
+                    :ref="(el: HTMLCanvasElement) => (promoCanvasRef = el)"
+                    :width="500"
+                    :height="400"></canvas>
+            </div>
         </div>
     </div>
+
+    <!--         
+        <button
+            @click="downloadPreview"
+            :disabled="!previews.length"
+        >
+            Download Preview
+        </button> -->
 </template>
