@@ -168,7 +168,9 @@
 
     watch(
         () => props.sizes,
-        (newSizes) => generatePreviews(null),
+        (newSizes) => {
+            generatePreviews(null);
+        },
         { immediate: true, deep: true }
     );
 </script>
@@ -211,9 +213,10 @@
             <h2 class="text text-4xl">Previews</h2>
             <div class="preview-row">
                 <canvas
+                    v-for="backgroundColor in backgroundColors"
                     :ref="(el: HTMLCanvasElement) => (promoCanvasRef = el)"
                     :width="500"
-                    :height="400"></canvas>
+                    :height="200"></canvas>
             </div>
         </div>
     </div>
