@@ -21,11 +21,20 @@
     }
     const previews = ref<Preview[]>([]);
     const canvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
+    const previewCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const originalCanvasRef = ref<HTMLCanvasElement | null>(null);
 
     const setCanvasRef = (size: number, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
             canvasRefs.value.set(`scaled-${size}`, el);
+        } else {
+            console.error("Element is not a canvas:", el);
+        }
+    };
+
+    const setPreviewCanvasRef = (backgroundColor: string, el: Element | null) => {
+        if (el instanceof HTMLCanvasElement) {
+            canvasRefs.value.set(`preview-${backgroundColor}`, el);
         } else {
             console.error("Element is not a canvas:", el);
         }
@@ -108,25 +117,21 @@
         const context = canvas.getContext("2d");
         if (!context) return;
 
-        const slotSize = 112;
-        const totalWidth = 500;
-        const rowHeight = 200;
-        const emotesWidth = 112 * 3;
+        const slotSize = props.sizes[0];
+        const totalWidth = slotSize * props.sizes.length;
+        const rowHeight = props.sizes[0];
+        const emotesWidth = props.sizes[0] * 3;
         const horizontalPadding = (totalWidth - emotesWidth) / 2;
 
         canvas.width = totalWidth;
-        canvas.height = rowHeight * 2;
-
-        // Draw full background rectangles
-        context.fillStyle = "black";
-        context.fillRect(0, 0, totalWidth, rowHeight);
-        context.fillStyle = "white";
-        context.fillRect(0, rowHeight, totalWidth, rowHeight);
+        canvas.height = rowHeight * props.backgroundColors.length;
 
         // Load and draw images
         const loadPromises: Promise<void>[] = [];
         props.backgroundColors.forEach((bg, rowIndex) => {
             const rowOffset = rowIndex * rowHeight + rowHeight / 2 - slotSize / 2;
+            context.fillStyle = bg;
+            context.fillRect(0, 0, totalWidth, rowHeight * (rowIndex + 1));
 
             props.sizes.forEach((size, colIndex) => {
                 const preview = previews.value.find((p) => p.size === size);
@@ -176,7 +181,7 @@
 </script>
 
 <template>
-    <div class="w-full flex flex-flow-col">
+    <div class="w-full flex flex-row">
         <!-- Sizes -->
         <div class="w-full m-8">
             <h2 class="text text-4xl">Sizes</h2>
@@ -214,9 +219,10 @@
             <div class="preview-row">
                 <canvas
                     v-for="backgroundColor in backgroundColors"
-                    :ref="(el: HTMLCanvasElement) => (promoCanvasRef = el)"
-                    :width="500"
-                    :height="200"></canvas>
+                    :ref="(el: HTMLCanvasElement) => {
+                        setPreviewCanvasRef(backgroundColor, el)
+                        drawPreviewImage(el)
+                    }"></canvas>
             </div>
         </div>
     </div>
