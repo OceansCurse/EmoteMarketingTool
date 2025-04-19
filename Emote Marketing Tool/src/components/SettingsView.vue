@@ -2,15 +2,12 @@
     import { ref, watch } from "vue";
     import ColorList from "./ColorList.vue";
     import SizeList from "./SizeList.vue";
+    import type { Settings } from "../types/Settings.ts";
 
     const props = defineProps({
-        sizes: {
+        settings: {
             required: true,
-            type: Array as () => number[],
-        },
-        backgroundColors: {
-            required: true,
-            type: Array as () => string[],
+            type: Object as () => Settings,
         },
         onSizesUpdated: {
             required: true,
@@ -20,10 +17,22 @@
             required: true,
             type: Function,
         },
+        onHorizontalOuterPaddingUpdated: {
+            required: true,
+            type: Function,
+        },
+        onVerticalOuterPaddingUpdated: {
+            required: true,
+            type: Function,
+        },
+        onIconSpacingUpdated: {
+            required: true,
+            type: Function,
+        },
     });
 
-    const selectedPreset = ref<String>("Twitch");
-    const presets = ref<String[]>(["Twitch", "Discord", "YouTube"]);
+    const selectedPreset = ref<string>("Twitch");
+    const presets = ref<string[]>(["Twitch", "Discord", "YouTube"]);
 
     const onPresetChanged = (preset: String) => {
         console.log("Preset changed to");
@@ -54,11 +63,13 @@
         <h3 class="text text-2xl">Presets</h3>
         <select
             v-model="selectedPreset"
-            class="mt-2">
+            class="mt-2"
+        >
             <option
                 v-for="preset in presets"
                 :key="preset"
-                :value="preset">
+                :value="preset"
+            >
                 {{ preset }}
             </option>
         </select>
@@ -68,40 +79,74 @@
         <h3 class="text text-2xl">Backgrounds</h3>
         <ColorList
             class="mt-4"
-            :colors="backgroundColors"
+            :colors="props.settings.backgroundColors"
             :onColorAdded="(color: string) => {
-              let newColors = props.backgroundColors;
+              let newColors = props.settings.backgroundColors;
               newColors.push(color);
               props.onBackgroundColorsUpdated(newColors);
             }"
             :onColorRemoved="(color: string) => {
-              let newColors = props.backgroundColors;
+              let newColors = props.settings.backgroundColors;
                 const index = newColors.indexOf(color);
                 if (index > -1) {
                   newColors.splice(index, 1).reverse();
                 }
                 props.onBackgroundColorsUpdated(newColors);
-              }" />
+              }"
+        />
     </section>
 
     <section class="mt-4">
         <h3 class="text text-2xl">Sizes</h3>
         <SizeList
-            :sizes="props.sizes"
+            :sizes="props.settings.sizes"
             :onSizeAdded="(size: number) => {
-              let newSizes = props.sizes;
+              let newSizes = props.settings.sizes;
               newSizes.push(size);
               newSizes.sort((a, b) => a - b).reverse();
               props.onSizesUpdated(newSizes);
             }"
             :onSizeRemoved="(size: number) => {
-              let newSizes = props.sizes;
+              let newSizes = props.settings.sizes;
               const index = newSizes.indexOf(size);
                 if (index > -1) {
                   newSizes.splice(index, 1);
                   newSizes.sort((a, b) => a - b).reverse();
                   props.onSizesUpdated(newSizes);
                 }
-            }" />
+            }"
+        />
+    </section>
+    <section class="mt-4">
+        <h3 class="text text-2xl">Paddings</h3>
+        <p>Horizontal Outer Padding</p>
+        <input
+            type="number"
+            v-model="props.settings.horizontalOuterPadding"
+            class="mt-2"
+            @change="
+                (e) => {
+                    props.onHorizontalOuterPaddingUpdated(e.target.value as number);
+                }
+            "
+        />
+        <p>Vertical Outer Padding</p>
+        <input
+            type="number"
+            v-model="props.settings.verticalOuterPadding"
+            class="mt-2"
+            @change="(e: Event) => {
+                props.onVerticalOuterPaddingUpdated(e.target.value as number);
+            }"
+        />
+        <p>Icon Spacing</p>
+        <input
+            type="number"
+            v-model="props.settings.iconSpacing"
+            class="mt-2"
+            @change="(e: Event) => {
+                props.onIconSpacingUpdated(e.target.value as number);
+            }"
+        />
     </section>
 </template>

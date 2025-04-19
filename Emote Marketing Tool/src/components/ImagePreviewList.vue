@@ -1,14 +1,11 @@
 <script setup lang="ts">
     import { ref, watch } from "vue";
+    import type { Settings } from "../types/Settings.ts";
 
     const props = defineProps({
-        sizes: {
+        settings: {
             required: true,
-            type: Array as () => number[],
-        },
-        backgroundColors: {
-            required: true,
-            type: Array as () => string[],
+            type: Object as () => Settings,
         },
         originalImage: {
             type: HTMLImageElement || null,
@@ -20,13 +17,13 @@
         dataUrl: string;
     }
     const previews = ref<Preview[]>([]);
-    const canvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
+    const sizeCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const previewCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const originalCanvasRef = ref<HTMLCanvasElement | null>(null);
 
     const setCanvasRef = (size: number, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
-            canvasRefs.value.set(`scaled-${size}`, el);
+            sizeCanvasRefs.value.set(`scaled-${size}`, el);
         } else {
             console.error("Element is not a canvas:", el);
         }
@@ -34,7 +31,8 @@
 
     const setPreviewCanvasRef = (backgroundColor: string, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
-            canvasRefs.value.set(`preview-${backgroundColor}`, el);
+            sizeCanvasRefs.value.set(`preview-${backgroundColor}`, el);
+            drawBackgroundPreview(backgroundColor, el);
         } else {
             console.error("Element is not a canvas:", el);
         }
@@ -43,7 +41,8 @@
     // Needs to be optimized, Could just generate sizes ones when the image is uploaded
     // Taking the original size and just halving it until something like 12px, then every time
     // sizes change, it could just pick the closest bigger size.
-    const generatePreviews = (original: HTMLCanvasElement | null) => {
+    const generateSizePreviews = (original: HTMLCanvasElement | null) => {
+        const sizes = props.settings.sizes;
         if (original instanceof HTMLCanvasElement) {
             originalCanvasRef.value = original;
         } else {
@@ -53,7 +52,7 @@
 
         previews.value = [];
         if (!props.originalImage) return;
-        if (canvasRefs.value.size === 0) return;
+        if (sizeCanvasRefs.value.size === 0) return;
 
         const originalCanvas = originalCanvasRef.value;
         if (!originalCanvas) return;
@@ -62,7 +61,7 @@
         if (!originalContext || !props.originalImage) return;
 
         let resizeSize = originalCanvasRef.value.width;
-        console.log("original size is", resizeSize);
+        // console.log("original size is", resizeSize);
         originalContext.drawImage(props.originalImage, 0, 0, resizeSize, resizeSize, 0, 0, resizeSize, resizeSize);
 
         const resizeCanvas = document.createElement("canvas");
@@ -73,8 +72,8 @@
         resizeContext.imageSmoothingEnabled = true;
         resizeContext.drawImage(originalCanvas, 0, 0, resizeSize, resizeSize);
 
-        props.sizes.forEach((size) => {
-            console.log("Generating preview for size: ", size, resizeSize);
+        sizes.forEach((size) => {
+            // console.log("Generating preview for size: ", size, resizeSize);
             if (size * 2 < resizeSize) {
                 let tempCanvas = document.createElement("canvas");
                 tempCanvas.width = resizeSize;
@@ -87,11 +86,11 @@
                 resizeSize /= 2;
                 resizeCanvas.width = resizeSize;
                 resizeCanvas.height = resizeSize;
-                console.log("size is now: ", resizeSize);
+                // console.log("size is now: ", resizeSize);
                 resizeContext.drawImage(tempCanvas, 0, 0, resizeSize, resizeSize);
             }
 
-            const canvas = canvasRefs.value.get(`scaled-${size}`);
+            const canvas = sizeCanvasRefs.value.get(`scaled-${size}`);
             if (!canvas) return;
             canvas.width = size;
             canvas.height = size;
@@ -103,7 +102,7 @@
             context.imageSmoothingEnabled = true;
 
             // Clear
-            console.log("Drawing resize canvas at ", size);
+            // console.log("Drawing resize canvas at ", size);
             context.drawImage(resizeCanvas, 0, 0, size, size);
 
             previews.value.push({
@@ -113,57 +112,55 @@
         });
     };
 
-    const drawPreviewImage = async (canvas: HTMLCanvasElement) => {
+    const drawBackgroundPreview = async (bg: string, canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         if (!context) return;
+        const sizes = props.settings.sizes;
 
-        const slotSize = props.sizes[0];
-        const totalWidth = slotSize * props.sizes.length;
-        const rowHeight = props.sizes[0];
-        const emotesWidth = props.sizes[0] * 3;
-        const horizontalPadding = (totalWidth - emotesWidth) / 2;
+        const slotHeight = sizes[0];
+        const slotsWidth = sizes.reduce((acc, size) => acc + size, 0);
+        const spacing = Number(props.settings.iconSpacing);
+        const horizontalPadding = Number(props.settings.horizontalOuterPadding);
+        const verticalPadding = Number(props.settings.verticalOuterPadding);
+        const rowHeight = sizes[0] + verticalPadding * 2;
+        const totalWidth = slotsWidth + horizontalPadding * 2 + (sizes.length - 1) * spacing;
 
         canvas.width = totalWidth;
-        canvas.height = rowHeight * props.backgroundColors.length;
+        canvas.height = rowHeight;
 
         // Load and draw images
         const loadPromises: Promise<void>[] = [];
-        props.backgroundColors.forEach((bg, rowIndex) => {
-            const rowOffset = rowIndex * rowHeight + rowHeight / 2 - slotSize / 2;
-            context.fillStyle = bg;
-            context.fillRect(0, 0, totalWidth, rowHeight * (rowIndex + 1));
 
-            props.sizes.forEach((size, colIndex) => {
-                const preview = previews.value.find((p) => p.size === size);
-                if (!preview) return;
+        const rowOffset = 0 * rowHeight + rowHeight / 2 - slotHeight / 2;
+        context.fillStyle = bg;
+        context.fillRect(0, 0, totalWidth, rowHeight);
 
-                const img = new Image();
-                img.src = preview.dataUrl;
+        let colOffset = 0;
+        sizes.forEach((size, colIndex) => {
+            const preview = previews.value.find((p) => p.size === size);
+            if (!preview) return;
 
-                const promise = new Promise<void>((resolve) => {
-                    img.onload = () => {
-                        const colOffset = colIndex * slotSize;
-                        const xOffset = colOffset + horizontalPadding + (slotSize / 2 - size / 2);
-                        const yOffset = rowOffset + (slotSize / 2 - size / 2);
+            const width = size; // or sizes[0]
+            const xOffset = colOffset + horizontalPadding + spacing * colIndex;
+            const yOffset = rowOffset;
+            const xAlignOffset = width / 2 - size / 2;
+            const yAlignOffset = sizes[0] / 2 - size / 2;
 
-                        context.fillStyle = "red";
-                        context.lineWidth = 2;
-                        context.strokeStyle = "#FF0000";
-                        context.strokeRect(colOffset + horizontalPadding, rowOffset, slotSize, slotSize);
-                        context.drawImage(img, xOffset, yOffset, size, size);
-                        resolve();
-                    };
-                });
-                loadPromises.push(promise);
-            });
+            context.fillStyle = "red";
+            context.lineWidth = 2;
+            context.strokeStyle = "#FF0000";
+            context.strokeRect(xOffset, rowOffset, width, slotHeight);
+            const canvas = sizeCanvasRefs.value.get(`scaled-${size}`);
+            if (!canvas) return;
+            context.drawImage(canvas, xOffset + xAlignOffset, yOffset + yAlignOffset, size, size);
+
+            colOffset += size + spacing;
         });
-
-        return await Promise.all(loadPromises);
     };
 
     const downloadPreview = async () => {
         const canvas = document.createElement("canvas");
-        await drawPreviewImage(canvas);
+        await drawBackgroundPreview("black", canvas);
 
         const link = document.createElement("a");
         link.download = "emote-preview.png";
@@ -172,57 +169,65 @@
     };
 
     watch(
-        () => props.sizes,
-        (newSizes) => {
-            generatePreviews(null);
+        () => props.settings,
+        (newSettings) => {
+            sizeCanvasRefs.value.forEach((canvas, size) => {
+                generateSizePreviews(canvas);
+            });
+            previewCanvasRefs.value.forEach((canvas, bg) => {
+                drawBackgroundPreview(bg, canvas);
+            });
         },
         { immediate: true, deep: true }
     );
 </script>
 
 <template>
-    <div class="w-full flex flex-row">
+    <div class="w-full flex flex-flow-col flex-wrap">
         <!-- Sizes -->
-        <div class="w-full m-8">
+        <div class="flex-1 w-full m-8">
             <h2 class="text text-4xl">Sizes</h2>
             <p
                 v-if="!props.originalImage"
-                class="text text-l">
+                class="text text-l"
+            >
                 No image uploaded
             </p>
             <div class="inline-block m-2">
                 <canvas
-                    :ref="(el) => generatePreviews(el as HTMLCanvasElement)"
+                    :ref="(el) => generateSizePreviews(el as HTMLCanvasElement)"
                     :width="originalImage?.naturalWidth ?? 0"
-                    :height="originalImage?.naturalWidth ?? 0"></canvas>
+                    :height="originalImage?.naturalWidth ?? 0"
+                ></canvas>
                 <p
                     v-if="originalImage"
-                    class="text text-center w-full">
+                    class="text text-center w-full"
+                >
                     {{ originalImage?.naturalWidth ?? 0 }}x{{ originalImage?.naturalWidth ?? 0 }}
                     (Original)
                 </p>
             </div>
             <div
-                v-for="size in props.sizes"
+                v-for="size in props.settings.sizes"
                 :key="size"
-                class="inline-block m-2">
+                class="inline-block m-2"
+            >
                 <canvas
                     :ref="(el) => setCanvasRef(size, el as HTMLCanvasElement)"
                     :width="size"
-                    :height="size"></canvas>
+                    :height="size"
+                ></canvas>
                 <p class="text text-center w-full">{{ size }}x{{ size }}</p>
             </div>
         </div>
         <!-- Previews -->
-        <div class="w-full m-8">
+        <div class="flex-1 w-full m-8">
             <h2 class="text text-4xl">Previews</h2>
             <div class="preview-row">
                 <canvas
-                    v-for="backgroundColor in backgroundColors"
-                    :ref="(el: HTMLCanvasElement) => {
-                        setPreviewCanvasRef(backgroundColor, el)
-                        drawPreviewImage(el)
-                    }"></canvas>
+                    v-for="backgroundColor in props.settings.backgroundColors"
+                    :ref="(el) => { setPreviewCanvasRef(backgroundColor, el as HTMLCanvasElement) }"
+                ></canvas>
             </div>
         </div>
     </div>

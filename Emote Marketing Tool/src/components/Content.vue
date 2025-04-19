@@ -2,15 +2,12 @@
     import { ref } from "vue";
     import ImagePreviewList from "./ImagePreviewList.vue";
     import FileSelector from "./FileSelector.vue";
+    import type { Settings } from "../types/Settings.ts";
 
     const props = defineProps({
-        sizes: {
+        settings: {
             required: true,
-            type: Array as () => number[],
-        },
-        backgroundColors: {
-            required: true,
-            type: Array as () => string[],
+            type: Object as () => Settings,
         },
     });
 
@@ -26,34 +23,39 @@
         <Transition name="fade">
             <div
                 v-if="originalImage == null"
-                class="w-full h-full absolute">
+                class="w-full h-full absolute"
+            >
                 <FileSelector :onImageSelected="(image: HTMLImageElement) => {originalImage = image}" />
             </div>
         </Transition>
         <Transition name="fade">
             <div
                 v-if="originalImage != null"
-                class="absolute right-0">
+                class="absolute z-100 right-0"
+            >
                 <button
                     type="button"
                     class="m-8 bg-blue-500 text-white px-4 py-2 rounded cursor-pointer align-middle"
                     @click="clearEmote"
-                    aria-label="Clear selected emote">
+                    aria-label="Clear selected emote"
+                >
                     Clear emote
                     <i
                         class="pi pi-times align-text-bottom ml-2"
-                        aria-hidden="true"></i>
+                        aria-hidden="true"
+                    ></i>
                 </button>
             </div>
         </Transition>
         <Transition name="fade">
             <div
                 v-if="originalImage != null"
-                class="absolute w-full">
+                class="absolute w-full"
+            >
                 <ImagePreviewList
-                    :sizes="props.sizes"
-                    :backgroundColors="props.backgroundColors"
-                    :originalImage="originalImage" />
+                    :settings="props.settings"
+                    :originalImage="originalImage"
+                />
             </div>
         </Transition>
     </div>

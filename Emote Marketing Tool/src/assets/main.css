@@ -8,3 +8,7 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+input, select {
+  @apply border-2 border-gray-300 rounded px-2 py-1;
+}
