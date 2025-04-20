@@ -31,30 +31,12 @@
         <Transition name="fade">
             <div
                 v-if="originalImage != null"
-                class="absolute z-100 right-0"
-            >
-                <button
-                    type="button"
-                    class="m-8 bg-blue-500 text-white px-4 py-2 rounded cursor-pointer align-middle"
-                    @click="clearEmote"
-                    aria-label="Clear selected emote"
-                >
-                    Clear emote
-                    <i
-                        class="pi pi-times align-text-bottom ml-2"
-                        aria-hidden="true"
-                    ></i>
-                </button>
-            </div>
-        </Transition>
-        <Transition name="fade">
-            <div
-                v-if="originalImage != null"
                 class="absolute w-full"
             >
                 <ImagePreviewList
                     :settings="props.settings"
                     :originalImage="originalImage"
+                    :onClearEmote="clearEmote"
                 />
             </div>
         </Transition>

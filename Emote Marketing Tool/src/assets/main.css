@@ -2,13 +2,38 @@
 
 body {
   @apply bg-gray-100 text-gray-900;
-  
+
   font-family: "Exo 2", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
 }
 
-input, select {
+input,
+select {
   @apply border-2 border-gray-300 rounded px-2 py-1;
+}
+
+*::-webkit-scrollbar {
+  width: 20px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: #e4e4e4;
+  border-radius: 100px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 100px;
+  border: 6px solid rgba(0, 0, 0, 0);
+  border-left: 0;
+  border-right: 0;
+  background-color: #ffffff00;
+}
+
+/* For Firefox */
+* {
+  box-sizing: border-box;
+  scrollbar-color: #bababa transparent;
+  scrollbar-width: thin;
 }
