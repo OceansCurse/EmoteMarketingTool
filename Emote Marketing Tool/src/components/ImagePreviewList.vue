@@ -36,7 +36,7 @@
 
     const setPreviewCanvasRef = (backgroundColor: string, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
-            sizeCanvasRefs.value.set(`preview-${backgroundColor}`, el);
+            previewCanvasRefs.value.set(`preview-${backgroundColor}`, el);
             const index = props.settings.backgroundColors.indexOf(backgroundColor);
             drawBackgroundPreview(backgroundColor, labelColors.value[index], el);
         } else {
@@ -187,14 +187,33 @@
         });
     };
 
-    const downloadPreview = async () => {
-        const canvas = document.createElement("canvas");
-        await drawBackgroundPreview("black", "white", canvas);
+    const downloadCanvas = async (backgroundColor: string) => {
+        console.log("Downloading canvas for color", backgroundColor, previewCanvasRefs);
+        const canvas = previewCanvasRefs.value.get(`preview-${backgroundColor}`);
+        if (!canvas) return;
 
+        console.log("Downloading canvas", canvas);
         const link = document.createElement("a");
-        link.download = "emote-preview.png";
+        link.download = "emote-banner.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
+    };
+
+    const getDownlodIconColor = (color = "") => {
+        // Parse hex (remove #, ignore alpha)
+        const colorPart = color.slice(1).substring(0, 6);
+        const rgb = parseInt(colorPart, 16);
+
+        // Extract RGB components
+        const r = (rgb >> 16) & 255;
+        const g = (rgb >> 8) & 255;
+        const b = rgb & 255;
+
+        // Calculate luminance (perceived brightness)
+        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+        // Return white for dark colors, black for light colors
+        return luminance > 128 ? "#000000" : "#FFFFFF";
     };
 
     watch(
@@ -241,7 +260,7 @@
                 <p class="text text-center w-full">{{ size }}x{{ size }}</p>
             </div>
             <div class="m-2">
-                <div class="w-max">
+                <div class="w-max relative">
                     <canvas
                         :ref="(el) => generateSizePreviews(el as HTMLCanvasElement)"
                         :width="originalImage?.naturalWidth ?? 0"
@@ -259,9 +278,17 @@
         <div class="flex-1 w-full m-8">
             <h2 class="text text-4xl">Previews</h2>
             <div class="preview-row mt-4">
-                <canvas
-                    v-for="backgroundColor in props.settings.backgroundColors"
-                    :ref="(el) => { setPreviewCanvasRef(backgroundColor, el as HTMLCanvasElement) }"></canvas>
+                <div
+                    class="relative w-max"
+                    v-for="backgroundColor in props.settings.backgroundColors">
+                    <canvas :ref="(el) => { setPreviewCanvasRef(backgroundColor, el as HTMLCanvasElement) }"></canvas>
+                    <i
+                        class="pi pi-download align-text-bottom p-4 absolute top-0 right-0 cursor-pointer"
+                        :style="`color: ${getDownlodIconColor(backgroundColor)}`"
+                        aria-hidden="true"
+                        @click="downloadCanvas(backgroundColor)"
+                        ></i>
+                </div>
             </div>
         </div>
     </div>
