@@ -188,13 +188,39 @@
     };
 
     const downloadCanvas = async (backgroundColor: string) => {
-        console.log("Downloading canvas for color", backgroundColor, previewCanvasRefs);
         const canvas = previewCanvasRefs.value.get(`preview-${backgroundColor}`);
         if (!canvas) return;
 
-        console.log("Downloading canvas", canvas);
         const link = document.createElement("a");
-        link.download = "emote-banner.png";
+        link.download = `emote-banner-${backgroundColor}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    };
+
+    const downloadFullPreview = async () => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!canvas) return;
+        if (!context) return;
+
+        let height = 0;
+        let width = 0;
+        previewCanvasRefs.value.forEach((canvas) => {
+            height += canvas.height;
+            width = Math.max(width, canvas.width);
+        });
+        canvas.width = width;
+        canvas.height = height;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        let heightOffset = 0;
+        previewCanvasRefs.value.forEach((canvas, backgroundColor) => {
+            context.drawImage(canvas, 0, heightOffset);
+            heightOffset += canvas.height;
+        });
+
+        const link = document.createElement("a");
+        link.download = "full-emote-preview.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
     };
@@ -276,7 +302,19 @@
         </div>
         <!-- Previews -->
         <div class="flex-1 w-full m-8">
-            <h2 class="text text-4xl">Previews</h2>
+            <div class="flex flex-flow-row justify-between items-center">
+                <h2 class="text text-4xl">Previews</h2>
+                <button
+                    type="button"
+                    class="bg-blue-500 text-white w-max px-4 py-2 rounded cursor-pointer align-end"
+                    @click="downloadFullPreview()"
+                    aria-label="Clear selected emote">
+                    Download
+                    <i
+                        class="pi pi-download align-text-bottom ml-2"
+                        aria-hidden="true"></i>
+                </button>
+            </div>
             <div class="preview-row mt-4">
                 <div
                     class="relative w-max"
@@ -286,8 +324,7 @@
                         class="pi pi-download align-text-bottom p-4 absolute top-0 right-0 cursor-pointer"
                         :style="`color: ${getDownlodIconColor(backgroundColor)}`"
                         aria-hidden="true"
-                        @click="downloadCanvas(backgroundColor)"
-                        ></i>
+                        @click="downloadCanvas(backgroundColor)"></i>
                 </div>
             </div>
         </div>
