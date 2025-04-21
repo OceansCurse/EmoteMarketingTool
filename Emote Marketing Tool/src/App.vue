@@ -7,25 +7,17 @@
     const settings = ref<Settings>({
         sizes: [112, 56, 28],
         backgroundColors: ["#FFFFFFFF", "#000000FF", "#2299FFFF"],
-        horizontalOuterPadding: 32,
-        verticalOuterPadding: 32,
-        iconSpacing: 16,
-        verticalAlignment: "middle",
-        useLargestWidth: true,
+        horizontalOuterPadding: 64,
+        verticalOuterPadding: 64,
+        iconSpacing: 64,
+        verticalAlignment: "bottom",
+        useLargestWidth: false,
         showSizeLabels: true,
-        sizeLabelColor: "#000000FF",
+        sizeLabelColors: ["#000000FF", "#FFFFFFFF", "#FFFFFFFF"],
         sizeLabelFontSize: 16,
         sizeLabelFontFamily: "Exo 2",
+        sizeLabelsOccupySpace: true,
     });
-
-    const getScrollbarWidth = () => {
-        const outer = document.createElement("div");
-        outer.style.overflow = "scroll";
-        document.body.appendChild(outer);
-        const width = outer.offsetWidth - outer.clientWidth;
-        document.body.removeChild(outer);
-        return width;
-    };
 </script>
 
 <template>
@@ -41,10 +33,7 @@
                 <Content :settings="settings" />
             </main>
             <!-- Sidebar -->
-            <aside
-                class="h-full bg-neutral-100 p-8 rounded-2xl shadow-l overflow-auto"
-                :class="'right-[' + getScrollbarWidth() + 'px]'"
-            >
+            <aside class="h-full bg-neutral-100 p-8 rounded-2xl shadow-l overflow-auto">
                 <div class="">
                     <SettingsView
                         :settings="settings"
@@ -56,10 +45,10 @@
                         :onVerticalAlignmentUpdated="(newAlignment: 'top' | 'middle' | 'bottom') => settings.verticalAlignment = newAlignment"
                         :onLargestWidthUpdated="(useLargestWidth: boolean) => settings.useLargestWidth = useLargestWidth"
                         :onShowSizeLabelsUpdated="(showSizeLabels: boolean) => settings.showSizeLabels = showSizeLabels"
-                        :onSizeLabelColorUpdated="(color: string) => settings.sizeLabelColor = color"
+                        :onSizeLabelColorsUpdated="(colors: string[]) => settings.sizeLabelColors = colors"
                         :onSizeLabelFontSizeUpdated="(fontSize: number) => settings.sizeLabelFontSize = fontSize"
                         :onSizeLabelFontFamilyUpdated="(fontFamily: string) => settings.sizeLabelFontFamily = fontFamily"
-                    />
+                        :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
                 </div>
             </aside>
         </div>

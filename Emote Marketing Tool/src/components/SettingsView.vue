@@ -5,6 +5,7 @@
     import type { Settings } from "../types/Settings.ts";
     import { ColorPicker } from "vue3-colorpicker";
     import { ColorInputWithoutInstance } from "tinycolor2";
+    import LabeledCheckboxView from "./LabeledCheckboxView.vue";
 
     const props = defineProps({
         settings: {
@@ -39,7 +40,7 @@
             required: true,
             type: Function,
         },
-        onSizeLabelColorUpdated: {
+        onSizeLabelColorsUpdated: {
             required: true,
             type: Function,
         },
@@ -55,13 +56,17 @@
             required: true,
             type: Function,
         },
+        onSettingsUpdated: {
+            required: true,
+            type: Function,
+        },
     });
 
     const selectedPreset = ref<string>("Twitch");
     const presets = ref<string[]>(["Twitch", "Discord", "YouTube"]);
     const selectedFont = ref<string>("Exo 2");
     const fonts = ref<string[]>(["Arial", "Exo 2", "Helvetica", "Times New Roman", "Courier New"]);
-    const sizeLabelColor = ref<ColorInputWithoutInstance>("red");
+    const sizeLabelColors = ref<string[]>(props.settings.sizeLabelColors);
 
     const onPresetChanged = (preset: String) => {
         console.log("Preset changed to");
@@ -82,7 +87,7 @@
     };
 
     watch(selectedPreset, (newPreset) => onPresetChanged(newPreset));
-    watch(sizeLabelColor, (newColor) => props.onSizeLabelColorUpdated(newColor));
+    watch(sizeLabelColors, (sizeLabelColors) => props.onSizeLabelColorsUpdated(sizeLabelColors));
     watch(selectedFont, (newFont) => props.onSizeLabelFontFamilyUpdated(newFont));
 </script>
 
@@ -144,45 +149,49 @@
                   props.onSizesUpdated(newSizes);
                 }
             }" />
+        <p class="mt-2 text-lg">Size label color</p>
+        <div
+            v-for="(color, index) in props.settings.backgroundColors"
+            :key="index"
+            class="flex items-center my-2">
+            <div
+                class="inline-block w-6 h-6 rounded mr-2 border-1 border-neutral-400"
+                :style="{ background: color as string }"
+                role="img"
+                :aria-label="`Color swatch: ${color}`"></div>
+            <span class="mr-2">=></span>
+            <color-picker
+                v-model:pureColor="sizeLabelColors[index]"
+                format="hex8"
+                use-type="pure"
+                pickerType="chrome" />
+        </div>
+
         <!-- Largest width checkbox -->
-        <div class="mt-2 flex items-center gap-2">
-            <input
-                type="checkbox"
-                id="largestWidthCheckbox"
-                class="h-4 w-4"
-                v-model="props.settings.useLargestWidth"
-                @change="(e: Event) => {
-            props.onLargestWidthUpdated(e.target.checked);
-        }" />
-            <label
-                for="largestWidthCheckbox"
-                class="text text-base leading-none pb-1">
-                Use Largest Width
-            </label>
-        </div>
+        <LabeledCheckboxView
+            :checked="props.settings.useLargestWidth"
+            label="Use largest width"
+            @update:checked="(checked: boolean) =>{
+                props.onSettingsUpdated({ ...props.settings, useLargestWidth: checked });
+            }" />
+
         <!-- Show size labels checkbox -->
-        <div class="mt-2 flex items-center gap-2">
-            <input
-                type="checkbox"
-                id="showSizesLabelCheckbox"
-                class="h-4 w-4"
-                v-model="props.settings.showSizeLabels"
-                @change="(e: Event) => {
-            props.onShowSizeLabelsUpdated(e.target.checked);
-        }" />
-            <label
-                for="showSizesLabelCheckbox"
-                class="text text-base leading-none pb-1">
-                Show size labels
-            </label>
-        </div>
-        <p class="mt-2">Size label color</p>
-        <color-picker
-            v-model:pureColor="sizeLabelColor"
-            format="hex8"
-            use-type="pure"
-            pickerType="chrome" />
-        <p class="mt-2">Size label size</p>
+        <LabeledCheckboxView
+            :checked="props.settings.showSizeLabels"
+            label="Show size labels"
+            @update:checked="(checked: boolean) =>{
+                props.onSettingsUpdated({ ...props.settings, showSizeLabels: checked });
+            }" />
+
+        <!-- Size labels occupy space -->
+        <LabeledCheckboxView
+            :checked="props.settings.sizeLabelsOccupySpace"
+            label="Size labels occupy space"
+            @update:checked="(checked: boolean) => {
+                props.onSettingsUpdated({ ...props.settings, sizeLabelsOccupySpace: checked });
+            }" />
+
+        <p class="mt-2 text-lg">Size label size</p>
         <input
             type="number"
             v-model="props.settings.sizeLabelFontSize"
@@ -190,7 +199,7 @@
             @change="(e: Event) => {
                 props.onSizeLabelFontSizeUpdated(e.target.value as number);
             }" />
-        <p class="mt-2">Size label font</p>
+        <p class="mt-2 text-lg">Size label font</p>
         <select
             v-model="selectedFont"
             class="mt-2"
@@ -207,7 +216,7 @@
     </section>
     <section class="mt-8">
         <h3 class="text text-2xl">Alignments</h3>
-        <p>Vertical Alignement</p>
+        <p class="text-lg">Vertical Alignement</p>
         <select
             v-model="props.settings.verticalAlignment"
             class="mt-2"
@@ -221,7 +230,7 @@
     </section>
     <section class="mt-8">
         <h3 class="text text-2xl">Paddings</h3>
-        <p>Horizontal Outer Padding</p>
+        <p class="text-lg">Horizontal Outer Padding</p>
         <input
             type="number"
             v-model="props.settings.horizontalOuterPadding"
@@ -231,7 +240,7 @@
                     props.onHorizontalOuterPaddingUpdated(e.target.value as number);
                 }
             " />
-        <p>Vertical Outer Padding</p>
+        <p class="text-lg">Vertical Outer Padding</p>
         <input
             type="number"
             v-model="props.settings.verticalOuterPadding"
@@ -239,7 +248,7 @@
             @change="(e: Event) => {
                 props.onVerticalOuterPaddingUpdated(e.target.value as number);
             }" />
-        <p>Icon Spacing</p>
+        <p class="text-lg">Icon Spacing</p>
         <input
             type="number"
             v-model="props.settings.iconSpacing"

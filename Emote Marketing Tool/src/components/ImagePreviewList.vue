@@ -24,6 +24,7 @@
     const sizeCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const previewCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const originalCanvasRef = ref<HTMLCanvasElement | null>(null);
+    const labelColors = ref<string[]>(props.settings.sizeLabelColors);
 
     const setCanvasRef = (size: number, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
@@ -36,7 +37,8 @@
     const setPreviewCanvasRef = (backgroundColor: string, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
             sizeCanvasRefs.value.set(`preview-${backgroundColor}`, el);
-            drawBackgroundPreview(backgroundColor, el);
+            const index = props.settings.backgroundColors.indexOf(backgroundColor);
+            drawBackgroundPreview(backgroundColor, labelColors.value[index], el);
         } else {
             console.error("Element is not a canvas:", el);
         }
@@ -116,24 +118,26 @@
         });
     };
 
-    const drawBackgroundPreview = async (bg: string, canvas: HTMLCanvasElement) => {
+    const drawBackgroundPreview = async (backgroundColor: string, labelColor: string, canvas: HTMLCanvasElement) => {
         const context = canvas.getContext("2d");
         if (!context) return;
 
-        const sizes = props.settings.sizes;
-        const spacing = Number(props.settings.iconSpacing);
-        const horizontalPadding = Number(props.settings.horizontalOuterPadding);
-        const verticalPadding = Number(props.settings.verticalOuterPadding);
+        const settings = props.settings;
+        const sizes = settings.sizes;
+        const spacing = Number(settings.iconSpacing);
+        const horizontalPadding = Number(settings.horizontalOuterPadding);
+        const verticalPadding = Number(settings.verticalOuterPadding);
+        const textHeight = settings.sizeLabelsOccupySpace && settings.showSizeLabels ? Number(props.settings.sizeLabelFontSize) : 0;
 
         const slotHeight = sizes[0];
         const slotsWidth = props.settings.useLargestWidth ? sizes[0] * sizes.length : sizes.reduce((acc, size) => acc + size);
-        const rowHeight = slotHeight + verticalPadding * 2;
+        const rowHeight = slotHeight + textHeight + verticalPadding * 2;
         const totalWidth = slotsWidth + horizontalPadding * 2 + (sizes.length - 1) * spacing;
 
         canvas.width = totalWidth;
         canvas.height = rowHeight;
 
-        context.fillStyle = bg;
+        context.fillStyle = backgroundColor;
         context.fillRect(0, 0, totalWidth, rowHeight);
 
         let colOffset = 0;
@@ -143,7 +147,7 @@
 
             const width = props.settings.useLargestWidth ? sizes[0] : size;
             const xOffset = colOffset + horizontalPadding + spacing * colIndex;
-            const yOffset = rowHeight / 2 - slotHeight / 2;
+            const yOffset = verticalPadding;
             const xAlignOffset = width / 2 - size / 2;
             let yAlignOffset = slotHeight / 2 - size / 2;
             switch (props.settings.verticalAlignment) {
@@ -164,7 +168,7 @@
             context.fillStyle = "red";
             context.lineWidth = 2;
             context.strokeStyle = "#FF0000";
-            context.strokeRect(xOffset, yOffset, width, slotHeight);
+            // context.strokeRect(xOffset, yOffset, width, slotHeight);
 
             const canvas = sizeCanvasRefs.value.get(`scaled-${size}`);
             if (!canvas) return;
@@ -172,7 +176,7 @@
 
             // draw the size label if enabled
             if (props.settings.showSizeLabels) {
-                context.fillStyle = props.settings.sizeLabelColor;
+                context.fillStyle = labelColor;
                 context.font = `500 ${props.settings.sizeLabelFontSize}px "${props.settings.sizeLabelFontFamily}", sans-serif`;
                 context.textAlign = "center";
                 context.textBaseline = "bottom";
@@ -185,7 +189,7 @@
 
     const downloadPreview = async () => {
         const canvas = document.createElement("canvas");
-        await drawBackgroundPreview("black", canvas);
+        await drawBackgroundPreview("black", "white", canvas);
 
         const link = document.createElement("a");
         link.download = "emote-preview.png";
@@ -198,9 +202,6 @@
         (newSettings) => {
             sizeCanvasRefs.value.forEach((canvas, size) => {
                 generateSizePreviews(canvas);
-            });
-            previewCanvasRefs.value.forEach((canvas, bg) => {
-                drawBackgroundPreview(bg, canvas);
             });
         },
         { immediate: true, deep: true }

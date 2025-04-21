@@ -7,7 +7,8 @@ export interface Settings {
     verticalAlignment: "top" | "middle" | "bottom";
     useLargestWidth: boolean;
     showSizeLabels: boolean;
-    sizeLabelColor: string;
+    sizeLabelsOccupySpace: boolean;
+    sizeLabelColors: string[];
     sizeLabelFontSize: number;
     sizeLabelFontFamily: string;
 }
