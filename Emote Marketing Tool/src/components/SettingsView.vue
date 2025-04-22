@@ -42,7 +42,7 @@
             case "Discord":
                 newBackgroundColors = ["#FFFFFFFF", "#393A41FF", "#242429FF", "#131416FF"];
                 newSizeLabelColors = ["#000000FF", "#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"];
-                newSizes = [128, 32];
+                newSizes = [128, 64, 32];
                 break;
         }
         props.onSettingsUpdated({
