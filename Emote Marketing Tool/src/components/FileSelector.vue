@@ -11,7 +11,6 @@
     const fileInput = ref<HTMLInputElement | null>(null);
 
     const handleFileUpload = (event: Event) => {
-        console.log("handleFileUpload called");
         const target = event.target as HTMLInputElement;
         const file = target.files?.[0];
         if (!file) return;

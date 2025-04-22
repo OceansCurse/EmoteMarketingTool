@@ -68,7 +68,6 @@
         if (!originalContext || !props.originalImage) return;
 
         let resizeSize = originalCanvasRef.value.width;
-        // console.log("original size is", resizeSize);
         originalContext.drawImage(props.originalImage, 0, 0, resizeSize, resizeSize, 0, 0, resizeSize, resizeSize);
 
         const resizeCanvas = document.createElement("canvas");
@@ -80,7 +79,6 @@
         resizeContext.drawImage(originalCanvas, 0, 0, resizeSize, resizeSize);
 
         sizes.forEach((size) => {
-            // console.log("Generating preview for size: ", size, resizeSize);
             if (size * 2 < resizeSize) {
                 let tempCanvas = document.createElement("canvas");
                 tempCanvas.width = resizeSize;
@@ -93,7 +91,6 @@
                 resizeSize /= 2;
                 resizeCanvas.width = resizeSize;
                 resizeCanvas.height = resizeSize;
-                // console.log("size is now: ", resizeSize);
                 resizeContext.drawImage(tempCanvas, 0, 0, resizeSize, resizeSize);
             }
 
@@ -109,7 +106,6 @@
             context.imageSmoothingEnabled = true;
 
             // Clear
-            // console.log("Drawing resize canvas at ", size);
             context.drawImage(resizeCanvas, 0, 0, size, size);
 
             previews.value.push({

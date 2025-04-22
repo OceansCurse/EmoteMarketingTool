@@ -25,7 +25,6 @@
             @change="(e: Event) => {
                 if (e.target == null) return;
                 const value = (e.target as HTMLInputElement).checked;
-                console.log(value);
                 emit('update:checked', value)
             }" />
         <label
