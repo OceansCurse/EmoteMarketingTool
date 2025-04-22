@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+    import { ref } from "vue";
 
     const props = defineProps({
         label: {
@@ -22,7 +22,12 @@ import { ref } from 'vue';
             :id="label"
             class="h-4 w-4"
             v-model="checked"
-            @change="(e: Event) => emit('update:checked', e.target.checked)" />
+            @change="(e: Event) => {
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).checked;
+                console.log(value);
+                emit('update:checked', value)
+            }" />
         <label
             :for="label"
             class="text text-base leading-none pb-1">

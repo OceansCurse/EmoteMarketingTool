@@ -4,7 +4,6 @@
     import SizeList from "./SizeList.vue";
     import type { Settings } from "../types/Settings.ts";
     import { ColorPicker } from "vue3-colorpicker";
-    import { ColorInputWithoutInstance } from "tinycolor2";
     import LabeledCheckboxView from "./LabeledCheckboxView.vue";
 
     const props = defineProps({
@@ -69,14 +68,18 @@
             v-model="props.settings.fileName"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, fileName: e.target.value });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, fileName: value });
             }" />
         <p class="text-lg">File type</p>
         <select
             v-model="props.settings.fileType"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, exportFormat: e.target.value });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, exportFormat: value });
             }">
             <option value="png">PNG</option>
             <option value="jpg">JPG</option>
@@ -195,7 +198,9 @@
             v-model="props.settings.sizeLabelFontSize"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, sizeLabelFontSize: e.target.value as number });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, sizeLabelFontSize: value });
             }" />
         <p class="mt-2 text-lg">Size label font</p>
         <select
@@ -219,7 +224,9 @@
             v-model="props.settings.verticalAlignment"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, verticalAlignment: e.target.value as 'top' | 'middle' | 'bottom' });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, verticalAlignment: value as 'top' | 'middle' | 'bottom' });
             }">
             <option value="top">Top</option>
             <option value="middle">Middle</option>
@@ -233,9 +240,10 @@
             type="number"
             v-model="props.settings.horizontalOuterPadding"
             class="mt-2"
-            @change="
-                (e) => {
-                    props.onSettingsUpdated({ ...props.settings, horizontalOuterPadding: e.target.value as number });
+            @change="(e: Event) => {
+                    if (e.target == null) return;
+                    const value = (e.target as HTMLInputElement).value;
+                    props.onSettingsUpdated({ ...props.settings, horizontalOuterPadding: value });
                 }
             " />
         <p class="text-lg">Vertical Outer Padding</p>
@@ -244,7 +252,9 @@
             v-model="props.settings.verticalOuterPadding"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, verticalOuterPadding: e.target.value as number });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, verticalOuterPadding: value });
             }" />
         <p class="text-lg">Icon Spacing</p>
         <input
@@ -252,7 +262,9 @@
             v-model="props.settings.iconSpacing"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSettingsUpdated({ ...props.settings, iconSpacing: e.target.value as number });
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, iconSpacing: value });
             }" />
     </section>
 </template>

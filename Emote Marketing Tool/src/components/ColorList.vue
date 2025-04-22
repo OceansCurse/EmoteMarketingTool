@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { ref } from "vue";
     import { ColorPicker } from "vue3-colorpicker";
-    import { ColorInputWithoutInstance } from "tinycolor2";
+    import type { ColorInputWithoutInstance } from "tinycolor2";
     import "vue3-colorpicker/style.css";
 
     const props = defineProps({
