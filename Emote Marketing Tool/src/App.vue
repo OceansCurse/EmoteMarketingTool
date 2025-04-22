@@ -42,17 +42,6 @@
                 <div class="">
                     <SettingsView
                         :settings="settings"
-                        :onSizesUpdated="(newSizes: number[]) => settings.sizes = newSizes"
-                        :onBackgroundColorsUpdated="(newBackgroundColors: string[]) => settings.backgroundColors = newBackgroundColors"
-                        :onHorizontalOuterPaddingUpdated="(newPadding: number) => settings.horizontalOuterPadding = newPadding"
-                        :onVerticalOuterPaddingUpdated="(newPadding: number) => settings.verticalOuterPadding = newPadding"
-                        :onIconSpacingUpdated="(newSpacing: number) => settings.iconSpacing = newSpacing"
-                        :onVerticalAlignmentUpdated="(newAlignment: 'top' | 'middle' | 'bottom') => settings.verticalAlignment = newAlignment"
-                        :onLargestWidthUpdated="(useLargestWidth: boolean) => settings.useLargestWidth = useLargestWidth"
-                        :onShowSizeLabelsUpdated="(showSizeLabels: boolean) => settings.showSizeLabels = showSizeLabels"
-                        :onSizeLabelColorsUpdated="(colors: string[]) => settings.sizeLabelColors = colors"
-                        :onSizeLabelFontSizeUpdated="(fontSize: number) => settings.sizeLabelFontSize = fontSize"
-                        :onSizeLabelFontFamilyUpdated="(fontFamily: string) => settings.sizeLabelFontFamily = fontFamily"
                         :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
                 </div>
             </aside>

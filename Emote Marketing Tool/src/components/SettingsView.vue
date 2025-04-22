@@ -12,50 +12,6 @@
             required: true,
             type: Object as () => Settings,
         },
-        onSizesUpdated: {
-            required: true,
-            type: Function,
-        },
-        onBackgroundColorsUpdated: {
-            required: true,
-            type: Function,
-        },
-        onHorizontalOuterPaddingUpdated: {
-            required: true,
-            type: Function,
-        },
-        onVerticalOuterPaddingUpdated: {
-            required: true,
-            type: Function,
-        },
-        onIconSpacingUpdated: {
-            required: true,
-            type: Function,
-        },
-        onVerticalAlignmentUpdated: {
-            required: true,
-            type: Function,
-        },
-        onShowSizeLabelsUpdated: {
-            required: true,
-            type: Function,
-        },
-        onSizeLabelColorsUpdated: {
-            required: true,
-            type: Function,
-        },
-        onSizeLabelFontSizeUpdated: {
-            required: true,
-            type: Function,
-        },
-        onSizeLabelFontFamilyUpdated: {
-            required: true,
-            type: Function,
-        },
-        onLargestWidthUpdated: {
-            required: true,
-            type: Function,
-        },
         onSettingsUpdated: {
             required: true,
             type: Function,
@@ -69,26 +25,33 @@
     const sizeLabelColors = ref<string[]>(props.settings.sizeLabelColors);
 
     const onPresetChanged = (preset: String) => {
-        console.log("Preset changed to");
+        let newBackgroundColors = props.settings.backgroundColors;
+        let newSizes = props.settings.sizes;
+
         switch (preset) {
             case "Twitch":
-                props.onBackgroundColorsUpdated(["#FFFFFFFF", "#000000FF", "#2299FFFF"]);
-                props.onSizesUpdated([224, 112, 56, 28]);
+                newBackgroundColors = ["#FFFFFFFF", "#000000FF", "#2299FFFF"];
+                newSizes = [224, 112, 56, 28];
                 break;
             case "Discord":
-                props.onBackgroundColorsUpdated(["#FFFFFFFF", "#000000FF", "#FF0000FF"]);
-                props.onSizesUpdated([128, 64, 32]);
+                newBackgroundColors = ["#FFFFFFFF", "#000000FF", "#FF0000FF"];
+                newSizes = [128, 64, 32];
                 break;
             case "YouTube":
-                props.onBackgroundColorsUpdated(["#FF0000FF", "#FFFFFFFF", "#000000FF"]);
-                props.onSizesUpdated([128, 64, 32]);
+                newBackgroundColors = ["#FF0000FF", "#FFFFFFFF", "#000000FF"];
+                newSizes = [128, 64, 32];
                 break;
         }
+        props.onSettingsUpdated({
+            ...props.settings,
+            backgroundColors: newBackgroundColors,
+            sizes: newSizes,
+        });
     };
 
     watch(selectedPreset, (newPreset) => onPresetChanged(newPreset));
-    watch(sizeLabelColors, (sizeLabelColors) => props.onSizeLabelColorsUpdated(sizeLabelColors));
-    watch(selectedFont, (newFont) => props.onSizeLabelFontFamilyUpdated(newFont));
+    watch(sizeLabelColors, (sizeLabelColors) => props.onSettingsUpdated({ ...props.settings, sizeLabelColors }));
+    watch(selectedFont, (newFont) => props.onSettingsUpdated({ ...props.settings, sizeLabelFontFamily: newFont }));
 </script>
 
 <template>
@@ -141,7 +104,7 @@
             :onColorAdded="(color: string) => {
               let newColors = props.settings.backgroundColors;
               newColors.push(color);
-              props.onBackgroundColorsUpdated(newColors);
+              props.onSettingsUpdated({ ...props.settings, backgroundColors: newColors });
             }"
             :onColorRemoved="(color: string) => {
               let newColors = props.settings.backgroundColors;
@@ -149,7 +112,7 @@
                 if (index > -1) {
                   newColors.splice(index, 1).reverse();
                 }
-                props.onBackgroundColorsUpdated(newColors);
+                props.onSettingsUpdated({ ...props.settings, backgroundColors: newColors });
               }" />
     </section>
 
@@ -162,7 +125,7 @@
               let newSizes = props.settings.sizes;
               newSizes.push(size);
               newSizes.sort((a, b) => a - b).reverse();
-              props.onSizesUpdated(newSizes);
+              props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
             }"
             :onSizeRemoved="(size: number) => {
               let newSizes = props.settings.sizes;
@@ -170,7 +133,7 @@
                 if (index > -1) {
                   newSizes.splice(index, 1);
                   newSizes.sort((a, b) => a - b).reverse();
-                  props.onSizesUpdated(newSizes);
+                  props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
                 }
             }" />
         <p class="mt-2 text-lg">Size label color</p>
@@ -245,7 +208,7 @@
             v-model="props.settings.verticalAlignment"
             class="mt-2"
             @change="(e: Event) => {
-                props.onVerticalAlignmentUpdated(e.target.value);
+                props.onSettingsUpdated({ ...props.settings, verticalAlignment: e.target.value as 'top' | 'middle' | 'bottom' });
             }">
             <option value="top">Top</option>
             <option value="middle">Middle</option>
@@ -261,7 +224,7 @@
             class="mt-2"
             @change="
                 (e) => {
-                    props.onHorizontalOuterPaddingUpdated(e.target.value as number);
+                    props.onSettingsUpdated({ ...props.settings, horizontalOuterPadding: e.target.value as number });
                 }
             " />
         <p class="text-lg">Vertical Outer Padding</p>
@@ -270,7 +233,7 @@
             v-model="props.settings.verticalOuterPadding"
             class="mt-2"
             @change="(e: Event) => {
-                props.onVerticalOuterPaddingUpdated(e.target.value as number);
+                props.onSettingsUpdated({ ...props.settings, verticalOuterPadding: e.target.value as number });
             }" />
         <p class="text-lg">Icon Spacing</p>
         <input
@@ -278,7 +241,7 @@
             v-model="props.settings.iconSpacing"
             class="mt-2"
             @change="(e: Event) => {
-                props.onIconSpacingUpdated(e.target.value as number);
+                props.onSettingsUpdated({ ...props.settings, iconSpacing: e.target.value as number });
             }" />
     </section>
 </template>
