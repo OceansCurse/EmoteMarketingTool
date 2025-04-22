@@ -26,7 +26,6 @@
     const sizeCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const previewCanvasRefs = ref<Map<string, HTMLCanvasElement>>(new Map());
     const originalCanvasRef = ref<HTMLCanvasElement | null>(null);
-    const labelColors = ref<string[]>(props.settings.sizeLabelColors);
 
     const setCanvasRef = (size: number, el: Element | null) => {
         if (el instanceof HTMLCanvasElement) {
@@ -193,9 +192,13 @@
         const canvas = previewCanvasRefs.value.get(`preview-${backgroundColor}`);
         if (!canvas) return;
 
+        let fileType = props.settings.fileType as string;
         const link = document.createElement("a");
-        link.download = `emote-banner-${backgroundColor}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.download = `emote-banner-${backgroundColor}.${fileType}`;
+        if (fileType == "jpg") {
+            fileType = "jpeg";
+        }
+        link.href = canvas.toDataURL("image/" + fileType);
         link.click();
     };
 
@@ -203,7 +206,6 @@
         const zip = new JSZip();
 
         let fileType = props.settings.fileType as string;
-        const link = document.createElement("a");
         if (fileType == "jpg") {
             fileType = "jpeg";
         }

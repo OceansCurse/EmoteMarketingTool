@@ -119,7 +119,7 @@
                   newColors.splice(index, 1).reverse();
                 }
                 props.onSettingsUpdated({ ...props.settings, backgroundColors: newColors });
-              }" />
+            }" />
     </section>
 
     <section class="mt-8">
@@ -128,18 +128,18 @@
             class="mt-2"
             :sizes="props.settings.sizes"
             :onSizeAdded="(size: number) => {
-              let newSizes = props.settings.sizes;
-              newSizes.push(size);
-              newSizes.sort((a, b) => a - b).reverse();
-              props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
+                let newSizes = props.settings.sizes;
+                newSizes.push(size);
+                newSizes.sort((a, b) => a - b).reverse();
+                props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
             }"
             :onSizeRemoved="(size: number) => {
-              let newSizes = props.settings.sizes;
-              const index = newSizes.indexOf(size);
+                let newSizes = props.settings.sizes;
+                const index = newSizes.indexOf(size);
                 if (index > -1) {
-                  newSizes.splice(index, 1);
-                  newSizes.sort((a, b) => a - b).reverse();
-                  props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
+                    newSizes.splice(index, 1);
+                    newSizes.sort((a, b) => a - b).reverse();
+                    props.onSettingsUpdated({ ...props.settings, sizes: newSizes });
                 }
             }" />
         <p class="mt-2 text-lg">Size label color</p>
