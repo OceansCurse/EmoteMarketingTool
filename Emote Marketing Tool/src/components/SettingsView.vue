@@ -94,6 +94,30 @@
 <template>
     <h2 class="text text-3xl">Settings</h2>
 
+    <!-- Export options -->
+    <section class="mt-2">
+        <h3 class="text text-2xl">Export</h3>
+        <p class="text-lg">File name</p>
+        <input
+            type="text"
+            v-model="props.settings.fileName"
+            class="mt-2"
+            @change="(e: Event) => {
+                props.onSettingsUpdated({ ...props.settings, fileName: e.target.value });
+            }" />
+        <p class="text-lg">File type</p>
+        <select
+            v-model="props.settings.fileType"
+            class="mt-2"
+            @change="(e: Event) => {
+                props.onSettingsUpdated({ ...props.settings, exportFormat: e.target.value });
+            }">
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+            <option value="webp">WEBP</option>
+        </select>
+    </section>
+
     <!-- Presets dropdown -->
     <section class="mt-2">
         <h3 class="text text-2xl">Presets</h3>

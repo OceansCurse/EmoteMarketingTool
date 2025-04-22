@@ -1,4 +1,6 @@
 export interface Settings {
+    fileName: String;
+    fileType: "png" | "jpg" | "webp";
     backgroundColors: string[];
     sizes: number[];
     horizontalOuterPadding: number;

@@ -9,6 +9,10 @@
             required: true,
             type: Object as () => Settings,
         },
+        onSettingsUpdated: {
+            required: true,
+            type: Function,
+        },
     });
 
     const originalImage = ref<HTMLImageElement | null>(null);
@@ -23,21 +27,27 @@
         <Transition name="fade">
             <div
                 v-if="originalImage == null"
-                class="w-full h-full absolute"
-            >
-                <FileSelector :onImageSelected="(image: HTMLImageElement) => {originalImage = image}" />
+                class="w-full h-full absolute">
+                <FileSelector
+                    :onImageSelected="(image: HTMLImageElement, fileName: string, fileType: string) => {
+                        originalImage = image
+                        props.onSettingsUpdated({ 
+                            ...props.settings,
+                            exportFormat: fileType,
+                            fileName: fileName,
+                            fileType: fileType,
+                        });
+                    }" />
             </div>
         </Transition>
         <Transition name="fade">
             <div
                 v-if="originalImage != null"
-                class="absolute w-full"
-            >
+                class="absolute w-full">
                 <ImagePreviewList
                     :settings="props.settings"
                     :originalImage="originalImage"
-                    :onClearEmote="clearEmote"
-                />
+                    :onClearEmote="clearEmote" />
             </div>
         </Transition>
     </div>

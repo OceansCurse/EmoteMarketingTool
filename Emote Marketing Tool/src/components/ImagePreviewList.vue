@@ -202,21 +202,27 @@
     const downloadEmotes = async () => {
         const zip = new JSZip();
 
+        let fileType = props.settings.fileType as string;
+        const link = document.createElement("a");
+        if (fileType == "jpg") {
+            fileType = "jpeg";
+        }
+
         // Convert each canvas to a PNG and add to ZIP
         for (const canvasRef of sizeCanvasRefs.value) {
             const size = canvasRef[0].split("-")[1];
             const canvas = canvasRef[1];
             if (!canvas) continue;
 
-            const dataUrl = canvas.toDataURL("image/png");
-            const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-            zip.file(`icon-${size}x${size}.png`, base64Data, { base64: true });
+            const dataUrl = canvas.toDataURL("image/" + fileType);
+            const base64Data = dataUrl.replace(new RegExp(`^data:image/${fileType};base64,`), '');
+            zip.file(`${props.settings.fileName}-${size}x${size}.${props.settings.fileType}`, base64Data, { base64: true });
         }
 
         // Generate ZIP and trigger download
         try {
             const content = await zip.generateAsync({ type: "blob" });
-            saveAs(content, "icons.zip");
+            saveAs(content, props.settings.fileName + ".zip");
         } catch (error) {
             console.error("Error generating ZIP:", error);
         }
@@ -244,9 +250,13 @@
             heightOffset += canvas.height;
         });
 
+        let fileType = props.settings.fileType as string;
         const link = document.createElement("a");
-        link.download = "full-emote-preview.png";
-        link.href = canvas.toDataURL("image/png");
+        link.download = props.settings.fileName + "." + fileType;
+        if (fileType == "jpg") {
+            fileType = "jpeg";
+        }
+        link.href = canvas.toDataURL("image/" + fileType);
         link.click();
     };
 
