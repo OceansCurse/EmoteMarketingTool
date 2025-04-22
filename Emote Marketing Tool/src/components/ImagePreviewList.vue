@@ -215,7 +215,7 @@
             if (!canvas) continue;
 
             const dataUrl = canvas.toDataURL("image/" + fileType);
-            const base64Data = dataUrl.replace(new RegExp(`^data:image/${fileType};base64,`), '');
+            const base64Data = dataUrl.replace(new RegExp(`^data:image/${fileType};base64,`), "");
             zip.file(`${props.settings.fileName}-${size}x${size}.${props.settings.fileType}`, base64Data, { base64: true });
         }
 
@@ -332,7 +332,9 @@
                     :height="size"></canvas>
                 <p class="text text-center w-full">{{ size }}x{{ size }}</p>
             </div>
-            <div class="m-2">
+            <div
+                class="m-2"
+                :class="{ hidden: props.settings.hideOriginal }">
                 <div class="w-max relative">
                     <canvas
                         :ref="(el) => generateSizePreviews(el as HTMLCanvasElement)"

@@ -7,6 +7,7 @@ export interface Settings {
     verticalOuterPadding: number;
     iconSpacing: number;
     verticalAlignment: "top" | "middle" | "bottom";
+    hideOriginal: boolean;
     useLargestWidth: boolean;
     showSizeLabels: boolean;
     sizeLabelsOccupySpace: boolean;

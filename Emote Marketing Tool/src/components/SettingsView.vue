@@ -178,6 +178,14 @@
                 props.onSettingsUpdated({ ...props.settings, sizeLabelsOccupySpace: checked });
             }" />
 
+        <!-- Size labels occupy space -->
+        <LabeledCheckboxView
+            :checked="props.settings.hideOriginal"
+            label="Hide original"
+            @update:checked="(checked: boolean) => {
+                props.onSettingsUpdated({ ...props.settings, hideOriginal: checked });
+            }" />
+
         <p class="mt-2 text-lg">Size label size</p>
         <input
             type="number"

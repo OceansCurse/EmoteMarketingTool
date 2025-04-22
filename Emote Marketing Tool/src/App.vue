@@ -13,6 +13,7 @@
         verticalOuterPadding: 64,
         iconSpacing: 64,
         verticalAlignment: "bottom",
+        hideOriginal: false,
         useLargestWidth: false,
         showSizeLabels: true,
         sizeLabelColors: ["#000000FF", "#FFFFFFFF", "#FFFFFFFF"],
@@ -35,7 +36,6 @@
                 <Content
                     :settings="settings"
                     :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
-                />
             </main>
             <!-- Sidebar -->
             <aside class="h-full bg-neutral-100 p-8 rounded-2xl shadow-l overflow-auto">
