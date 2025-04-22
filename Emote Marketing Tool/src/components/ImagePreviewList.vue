@@ -1,6 +1,8 @@
 <script setup lang="ts">
     import { ref, watch } from "vue";
     import type { Settings } from "../types/Settings.ts";
+    import JSZip from "jszip";
+    import { saveAs } from "file-saver";
 
     const props = defineProps({
         settings: {
@@ -197,6 +199,29 @@
         link.click();
     };
 
+    const downloadEmotes = async () => {
+        const zip = new JSZip();
+
+        // Convert each canvas to a PNG and add to ZIP
+        for (const canvasRef of sizeCanvasRefs.value) {
+            const size = canvasRef[0].split("-")[1];
+            const canvas = canvasRef[1];
+            if (!canvas) continue;
+
+            const dataUrl = canvas.toDataURL("image/png");
+            const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
+            zip.file(`icon-${size}x${size}.png`, base64Data, { base64: true });
+        }
+
+        // Generate ZIP and trigger download
+        try {
+            const content = await zip.generateAsync({ type: "blob" });
+            saveAs(content, "icons.zip");
+        } catch (error) {
+            console.error("Error generating ZIP:", error);
+        }
+    };
+
     const downloadFullPreview = async () => {
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -257,18 +282,30 @@
     <div class="w-full flex flex-flow-col flex-wrap">
         <!-- Sizes -->
         <div class="flex-1 w-full m-8">
-            <div class="flex flex-flow-row justify-between items-center">
+            <div class="flex flex-flow-row justify-between">
                 <h2 class="text text-4xl">Sizes</h2>
-                <button
-                    type="button"
-                    class="bg-blue-500 text-white w-max px-4 py-2 rounded cursor-pointer align-end"
-                    @click="props.onClearEmote()"
-                    aria-label="Clear selected emote">
-                    Clear emote
-                    <i
-                        class="pi pi-times align-text-bottom ml-2"
-                        aria-hidden="true"></i>
-                </button>
+                <div class="flex flex-col w-max align-end">
+                    <button
+                        type="button"
+                        class="block bg-blue-500 text-white px-4 py-2 rounded cursor-pointer right-0"
+                        @click="props.onClearEmote()"
+                        aria-label="Clear selected emote">
+                        Clear emote
+                        <i
+                            class="pi pi-times align-text-bottom ml-2"
+                            aria-hidden="true"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="block bg-blue-500 text-white mt-2 px-4 py-2 rounded cursor-pointer"
+                        @click="downloadEmotes()"
+                        aria-label="Clear selected emote">
+                        Download
+                        <i
+                            class="pi pi-download align-text-bottom ml-2"
+                            aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
             <p
                 v-if="!props.originalImage"
