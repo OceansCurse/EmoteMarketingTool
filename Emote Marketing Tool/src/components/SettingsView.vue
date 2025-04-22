@@ -22,35 +22,38 @@
     const presets = ref<string[]>(["Twitch", "Discord", "YouTube"]);
     const selectedFont = ref<string>("Exo 2");
     const fonts = ref<string[]>(["Arial", "Exo 2", "Helvetica", "Times New Roman", "Courier New"]);
-    const sizeLabelColors = ref<string[]>(props.settings.sizeLabelColors);
 
     const onPresetChanged = (preset: String) => {
         let newBackgroundColors = props.settings.backgroundColors;
         let newSizes = props.settings.sizes;
+        let newSizeLabelColors = props.settings.sizeLabelColors;
 
         switch (preset) {
             case "Twitch":
-                newBackgroundColors = ["#FFFFFFFF", "#000000FF", "#2299FFFF"];
-                newSizes = [224, 112, 56, 28];
-                break;
-            case "Discord":
-                newBackgroundColors = ["#FFFFFFFF", "#000000FF", "#FF0000FF"];
-                newSizes = [128, 64, 32];
+                newBackgroundColors = ["#FFFFFFFF", "#18181BFF"];
+                newSizeLabelColors = ["#000000FF", "#FFFFFFFF"];
+                newSizes = [112, 56, 28];
                 break;
             case "YouTube":
-                newBackgroundColors = ["#FF0000FF", "#FFFFFFFF", "#000000FF"];
+                newBackgroundColors = ["#FFFFFFFF", "#000000FF"];
+                newSizeLabelColors = ["#000000FF", "#FFFFFFFF"];
                 newSizes = [128, 64, 32];
+                break;
+            case "Discord":
+                newBackgroundColors = ["#FFFFFFFF", "#393A41FF", "#242429FF", "#131416FF"];
+                newSizeLabelColors = ["#000000FF", "#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"];
+                newSizes = [128, 32];
                 break;
         }
         props.onSettingsUpdated({
             ...props.settings,
             backgroundColors: newBackgroundColors,
+            sizeLabelColors: newSizeLabelColors,
             sizes: newSizes,
         });
     };
 
     watch(selectedPreset, (newPreset) => onPresetChanged(newPreset));
-    watch(sizeLabelColors, (sizeLabelColors) => props.onSettingsUpdated({ ...props.settings, sizeLabelColors }));
     watch(selectedFont, (newFont) => props.onSettingsUpdated({ ...props.settings, sizeLabelFontFamily: newFont }));
 </script>
 
@@ -148,7 +151,7 @@
                 :aria-label="`Color swatch: ${color}`"></div>
             <span class="mr-2">=></span>
             <color-picker
-                v-model:pureColor="sizeLabelColors[index]"
+                v-model:pureColor="props.settings.sizeLabelColors[index]"
                 format="hex8"
                 use-type="pure"
                 pickerType="chrome" />
@@ -192,7 +195,7 @@
             v-model="props.settings.sizeLabelFontSize"
             class="mt-2"
             @change="(e: Event) => {
-                props.onSizeLabelFontSizeUpdated(e.target.value as number);
+                props.onSettingsUpdated({ ...props.settings, sizeLabelFontSize: e.target.value as number });
             }" />
         <p class="mt-2 text-lg">Size label font</p>
         <select

@@ -40,7 +40,7 @@
         if (el instanceof HTMLCanvasElement) {
             previewCanvasRefs.value.set(`preview-${backgroundColor}`, el);
             const index = props.settings.backgroundColors.indexOf(backgroundColor);
-            drawBackgroundPreview(backgroundColor, labelColors.value[index], el);
+            drawBackgroundPreview(backgroundColor, props.settings.sizeLabelColors[index], el);
         } else {
             console.error("Element is not a canvas:", el);
         }
