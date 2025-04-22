@@ -181,7 +181,7 @@
                 context.font = `500 ${props.settings.sizeLabelFontSize}px "${props.settings.sizeLabelFontFamily}", sans-serif`;
                 context.textAlign = "center";
                 context.textBaseline = "bottom";
-                context.fillText(`${size}x${size}`, xOffset + xAlignOffset + size / 2, yOffset + slotHeight + props.settings.sizeLabelFontSize + 8);
+                context.fillText(`${size}x${size}`, xOffset + xAlignOffset + size / 2, yOffset + slotHeight + Number(props.settings.sizeLabelFontSize) + 8);
             }
 
             colOffset += width;

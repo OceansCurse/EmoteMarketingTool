@@ -184,7 +184,7 @@
                 props.onSettingsUpdated({ ...props.settings, sizeLabelsOccupySpace: checked });
             }" />
 
-        <!-- Size labels occupy space -->
+        <!-- Hide original icon -->
         <LabeledCheckboxView
             :checked="props.settings.hideOriginal"
             label="Hide original"
@@ -241,10 +241,10 @@
             v-model="props.settings.horizontalOuterPadding"
             class="mt-2"
             @change="(e: Event) => {
-                    if (e.target == null) return;
-                    const value = (e.target as HTMLInputElement).value;
-                    props.onSettingsUpdated({ ...props.settings, horizontalOuterPadding: value });
-                }
+                if (e.target == null) return;
+                const value = (e.target as HTMLInputElement).value;
+                props.onSettingsUpdated({ ...props.settings, horizontalOuterPadding: value });
+            }
             " />
         <p class="text-lg">Vertical Outer Padding</p>
         <input

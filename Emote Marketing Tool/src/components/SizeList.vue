@@ -34,7 +34,7 @@
                     if (!props.sizes.find((number) => number == size)) {
                         props.onSizeAdded(size);
                     } else {
-                      console.log('didnt add size because it\'s already there')
+                      console.error('didnt add size because it\'s already there')
                     }
                 }
             "
