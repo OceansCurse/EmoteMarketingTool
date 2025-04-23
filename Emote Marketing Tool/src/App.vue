@@ -30,20 +30,18 @@
             <h1 class="text-4xl text-neutral-900">Emote Marketing Tool</h1>
         </header>
         <!-- Flex container for main and aside -->
-        <div class="flex flex-col md:flex-row flex-grow p-4 bg-neutral-200 overflow-auto">
+        <div class="flex flex-col lg:flex-row p-4 lg:p-8 gap-4 lg:gap-8 bg-neutral-200 h-full overflow-auto">
             <!-- Main Content -->
-            <main class="flex-1 h-full w-full bg-neutral-100 rounded-2xl shadow-l mr-4 overflow-auto">
+            <main class="w-full h-max lg:h-full lg:flex-1 bg-neutral-100 rounded-2xl shadow-lg lg:overflow-auto">
                 <Content
                     :settings="settings"
                     :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
             </main>
             <!-- Sidebar -->
-            <aside class="h-full bg-neutral-100 p-8 rounded-2xl shadow-l overflow-auto">
-                <div class="">
-                    <SettingsView
-                        :settings="settings"
-                        :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
-                </div>
+            <aside class="w-full lg:w-[400px] bg-neutral-100 p-8 rounded-2xl shadow-lg lg:overflow-auto">
+                <SettingsView
+                    :settings="settings"
+                    :onSettingsUpdated="(newSettings: Settings) => settings = newSettings" />
             </aside>
         </div>
     </div>

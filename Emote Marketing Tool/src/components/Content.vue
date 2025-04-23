@@ -23,27 +23,28 @@
 </script>
 
 <template>
-    <div class="w-full h-full relative">
-        <Transition name="fade">
+    <div class="w-full h-full">
+        <Transition
+            name="fade"
+            mode="out-in">
             <div
                 v-if="originalImage == null"
-                class="w-full h-full absolute">
+                class="w-full h-full flex flex-col items-center justify-center">
                 <FileSelector
                     :onImageSelected="(image: HTMLImageElement, fileName: string, fileType: string) => {
-                        originalImage = image
-                        props.onSettingsUpdated({ 
+                        originalImage = image;
+                        props.onSettingsUpdated({
                             ...props.settings,
                             exportFormat: fileType,
                             fileName: fileName,
                             fileType: fileType,
-                        });
-                    }" />
+                        }
+                );
+            }" />
             </div>
-        </Transition>
-        <Transition name="fade">
             <div
-                v-if="originalImage != null"
-                class="absolute w-full">
+                v-else
+                class="w-full">
                 <ImagePreviewList
                     :settings="props.settings"
                     :originalImage="originalImage"

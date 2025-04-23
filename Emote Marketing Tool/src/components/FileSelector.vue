@@ -37,14 +37,14 @@
 </script>
 
 <template>
-    <div class="h-full w-full grid grid-flow-col">
-        <div class="relative h-max w-max grid grid-flow-col justify-self-center self-center">
-            <div class="p-12 bg-neutral-600/50 justify-self-center self-center rounded-4xl inset-shadow-sm inset-shadow-neutral-900">
-                <div class="text-neutral-100 text-center border-neutral-900/50 border-4 border-dashed rounded-4xl p-20">
+    <div class="h-full w-full flex flex-flow-row flex-wrap justify-center items-center">
+        <section class="relative h-max w-max grid grid-flow-col justify-self-center self-center py-4 lg:py-8">
+            <div class="p-4 lg:p-12 bg-neutral-600/50 justify-self-center self-center rounded-4xl inset-shadow-sm inset-shadow-neutral-900">
+                <div class="text-neutral-100 text-center border-neutral-900/50 border-4 border-dashed rounded-4xl p-4 lg:p-12">
                     <i class="pi pi-file-arrow-up text-8xl mb-4"></i>
-                    <h2 class="text text-4xl">Click to choose a file</h2>
+                    <h2 class="text text-l md:text-xl lg:text-2xl">Click to choose a file</h2>
                     <p class="text text-xl my-4">or</p>
-                    <h2 class="text text-4xl">Drag a file in here</h2>
+                    <h2 class="text text-l md:text-xl lg:text-2xl">Drag a file in here</h2>
                 </div>
             </div>
             <div class="w-full h-full justify-self-center self-center absolute">
@@ -55,6 +55,21 @@
                     @change="handleFileUpload"
                     ref="fileInput" />
             </div>
-        </div>
+        </section>
+        <section class="w-max h-max max-w-120 p-8">
+            <h2 class="text text-xl md:text-2xl lg:text-4xl mb-4">Emotes Resizer and Markerting Tool</h2>
+            <p class="">
+                Upload an image to design professional emotes for Twitch, Discord, or social media. Customize colors, text, and styles to match your brand—all in minutes. Everything is processed in
+                your browser, so no data is transferred or stored.
+            </p>
+            <p>
+                <a
+                    class="text text-blue-400"
+                    href="/privacy-policy/"
+                    target="_blank"
+                    >Privacy Policy</a
+                >
+            </p>
+        </section>
     </div>
 </template>
